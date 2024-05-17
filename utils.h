@@ -1,38 +1,60 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
-#include <cstddef>
-#include <random>
-#include <iostream>
 #include "matrix.h"
 #include <chrono>
+#include <cstddef>
+#include <iostream>
+#include <random>
+#include <cstring>
 #define timerStart() auto _start = std::chrono::system_clock::now();
 #define timerEnd() auto _end = std::chrono::system_clock::now();
 #define timerCount()                                                           \
     std::chrono::duration_cast<std::chrono::microseconds>(_end - _start)       \
-            .count() / 1.0e6
+            .count() /                                                         \
+        1.0e6
 
 /******************************************************************************/
 /*                              generate problem                              */
 /******************************************************************************/
 
 template <typename Type>
-void generateRandomMatrix(size_t width, size_t height, Type *matrix) {
-    std::random_device dv;
-    std::mt19937 gen(dv());
-    std::uniform_real_distribution<> dis(-10, 10);
-
-    for (size_t i = 0; i < height; ++i) {
-        Type sum = 0;
-        for (size_t j = 0; j < width; ++j) {
-            Type value = dis(gen);
-            if (i == j && value == 0) value++; // make sure we don't have 0 on
-                                               // the diagonal (normally, we should
-                                               // exchange lines in this case
-                                               // but it's not done yet in the
-                                               // graph)
-            matrix[i * width + j] = value;
+void transpose(Type *matrix, size_t size) {
+    for (size_t i = 0; i < size; ++i) {
+        for (size_t j = 0; j < i; ++j) {
+            std::swap(matrix[i * size + j], matrix[j * size + i]);
         }
     }
+}
+
+template <typename Type>
+void dot(Type *a, Type *c, size_t size) {
+    for (size_t i = 0; i < size; ++i) {
+        for (size_t j = 0; j < size; ++j) {
+            for (size_t k = 0; k < size; ++k) {
+                c[i * size + j] = a[k * size + i] * a[k * size + j];
+            }
+        }
+    }
+}
+
+template <typename Type>
+void generateRandomMatrix(size_t size, Type *matrix, Type *result) {
+    std::random_device dv;
+    std::mt19937 gen(dv());
+    /* std::uniform_real_distribution<> dis(-10, 10); */
+    std::uniform_int_distribution<> dis(0, 10);
+
+    memset(matrix, 0, sizeof(Type) * size * size);
+    memset(result, 0, sizeof(Type) * size * size);
+    for (size_t i = 0; i < size; ++i) {
+        for (size_t j = 0; j <= i; ++j) {
+            Type value = dis(gen);
+            if (value == 0)
+                value++; // make sure we don't have 0 on the diagonal
+            result[i * size + j] = value;
+        }
+    }
+    dot(result, matrix, size);
 }
 
 /******************************************************************************/
@@ -40,14 +62,17 @@ void generateRandomMatrix(size_t width, size_t height, Type *matrix) {
 /******************************************************************************/
 
 template <typename Type>
-bool isTriangular(Matrix<Type> const& matrix, Type precision) {
+bool isTriangular(Matrix<Type> const &matrix, Type precision) {
     for (size_t i = 0; i < matrix.height(); ++i) {
         for (size_t j = 0; j <= i; ++j) {
-            bool isOne = (1 - precision) <= matrix.at(i, j) && matrix.at(i, j) <= (1 + precision);
-            bool isZero = -precision <= matrix.at(i, j) && matrix.at(i, j) <= precision;
+            bool isOne = (1 - precision) <= matrix.at(i, j) &&
+                         matrix.at(i, j) <= (1 + precision);
+            bool isZero =
+                -precision <= matrix.at(i, j) && matrix.at(i, j) <= precision;
             if ((i == j && !isOne) || (i != j && !isZero)) {
-                    std::cout << i << ", " << j << ": " << matrix.at(i, j) << std::endl;
-                    return false;
+                std::cout << i << ", " << j << ": " << matrix.at(i, j)
+                          << std::endl;
+                return false;
             }
         }
     }
