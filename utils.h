@@ -31,7 +31,7 @@ void dot(Type *a, Type *c, size_t size) {
     for (size_t i = 0; i < size; ++i) {
         for (size_t j = 0; j < size; ++j) {
             for (size_t k = 0; k < size; ++k) {
-                c[i * size + j] = a[k * size + i] * a[k * size + j];
+                c[i * size + j] += a[i * size + k] * a[j * size + k];
             }
         }
     }
