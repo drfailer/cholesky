@@ -3,7 +3,7 @@
 #include "matrix.h"
 #include <cmath>
 #include <stdexcept>
-#include <openblas/f77blas.h>
+#include <lapack.h>
 
 template <typename Type>
 void choleskyBanachiewicz(Matrix<Type> &matrix) {
@@ -28,7 +28,8 @@ void choleskyLapack(Matrix<Type> &A) {
   int32_t n = A.height();
   int32_t lda = A.width();
   int32_t info = 0;
-  dpotf2_((char*) "U", &n, A.get(), &lda, &info);
+  /* LAPACK_dpotf2((char*) "U", &n, A.get(), &lda, &info); */
+  LAPACK_dpotrf2((char*) "U", &n, A.get(), &lda, &info);
 }
 
 #endif
