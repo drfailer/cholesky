@@ -9,11 +9,16 @@ class Matrix {
     Matrix(size_t width, size_t height, T *ptr):
         width_(width), height_(height), ptr_(ptr) {}
 
+    Matrix(Matrix<T> const &other):
+      Matrix(other.width_, other.height_, other.ptr_) {}
+
     size_t width() const { return width_; }
     size_t height() const { return height_; }
 
     T at(size_t row, size_t col) const { return ptr_[row * width_ + col]; }
     T &at(size_t row, size_t col) { return ptr_[row * width_ + col]; }
+
+    T *get() { return ptr_; }
 
     friend std::ostream& operator<<(std::ostream& os, const Matrix<T>& matrix) {
         for (size_t row = 0; row < matrix.height(); ++row) {
