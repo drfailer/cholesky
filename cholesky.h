@@ -3,23 +3,32 @@
 #include "matrix.h"
 #include <cmath>
 #include <stdexcept>
+#include <openblas/f77blas.h>
 
 template <typename Type>
-void choleskyBanachiewicz(Matrix<Type> const &A, Matrix<Type> &L) {
-    for (size_t i = 0; i < A.height(); i++) {
-        for (size_t j = 0; j <= i; j++) {
-            Type sum = 0;
-            for (size_t k = 0; k < j; k++) {
-                sum += (L.at(i, k) * L.at(j, k));
-            }
+void choleskyBanachiewicz(Matrix<Type> &matrix) {
+  for (size_t i = 0; i < matrix.height(); i++) {
+    for (size_t j = 0; j <= i; j++) {
+      Type sum = 0;
+      for (size_t k = 0; k < j; k++) {
+        sum += (matrix.at(i, k) * matrix.at(j, k));
+      }
 
-            if (j == i) {
-                L.at(j, j) = sqrt(A.at(j, j) - sum);
-            } else {
-                L.at(i, j) = (A.at(i, j) - sum) / L.at(j, j);
-            }
-        }
+      if (j == i) {
+        matrix.at(j, j) = sqrt(matrix.at(j, j) - sum);
+      } else {
+        matrix.at(i, j) = (matrix.at(i, j) - sum) / matrix.at(j, j);
+      }
     }
+  }
+}
+
+template <typename Type>
+void choleskyLapack(Matrix<Type> &A) {
+  int32_t n = A.height();
+  int32_t lda = A.width();
+  int32_t info = 0;
+  dpotf2_((char*) "U", &n, A.get(), &lda, &info);
 }
 
 #endif

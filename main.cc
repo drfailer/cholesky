@@ -1,34 +1,65 @@
 #include "cholesky.h"
 #include "matrix.h"
 #include "utils.h"
+#include <cassert>
+#include <chrono>
 #include <cstring>
 #include <iostream>
+#include <fstream>
+#include <stdexcept>
 
 using MatrixType = double;
 
-int main(int, char **) {
-    constexpr size_t size = 3;
-    MatrixType memA[size * size] = {
-        4, 12, -16,
-        12, 37, -43,
-        -16, -43, 98
-    };
-    MatrixType memL[size * size];
-    Matrix<MatrixType> A(size, size, memA);
-    Matrix<MatrixType> L(size, size, memL);
+template <typename T>
+std::pair<Matrix<T>, Matrix<T>>
+initMatrix(std::string const &filename) {
+  std::ifstream fs(filename);
+  size_t width, height;
 
-    generateRandomMatrix(size, memA, memL);
+  fs >> width >> height;
+  Matrix<T> matrix(width, height, new T[width * height]());
+  Matrix<T> expected(width, height, new T[width * height]());
 
-    std::cout << "A:" << std::endl;
-    std::cout << A << std::endl;
-    std::cout << "-----------------" << std::endl;
-    std::cout << "expected L:" << std::endl;
-    std::cout << L << std::endl;
+  for (size_t i = 0; i < width * height; ++i) {
+    fs >> matrix.get()[i];
+  }
 
-    memset(memL, 0, sizeof(MatrixType) * size * size);
-    choleskyBanachiewicz(A, L);
-    std::cout << "-----------------" << std::endl;
-    std::cout << "found L:" << std::endl;
-    std::cout << L << std::endl;
-    return 0;
+  fs >> width >> height;
+  for (size_t i = 0; i < width * height; ++i) {
+    fs >> expected.get()[i];
+  }
+
+  return std::make_pair(matrix, expected);
+}
+
+
+int main(int argc, char **argv) {
+  if (argc < 2) {
+    throw std::invalid_argument("error: input file name must be provided");
+  }
+  auto result = initMatrix<MatrixType>(argv[1]);
+  auto matrix = result.first;
+  auto expected = result.second;
+
+
+  if (argc > 2) {
+    std::cout << "using lapack function:" << std::endl;
+    auto begin = std::chrono::system_clock::now();
+    choleskyLapack(matrix);
+    auto end = std::chrono::system_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+  } else {
+    std::cout << "using normal function:" << std::endl;
+    auto begin = std::chrono::system_clock::now();
+    choleskyBanachiewicz(matrix);
+    auto end = std::chrono::system_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+  }
+
+  if (!verifySoluton(matrix, expected)) {
+    std::cout << "ERROR" << std::endl;
+  }
+  delete[] matrix.get();
+  delete[] expected.get();
+  return 0;
 }

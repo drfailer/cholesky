@@ -1,6 +1,6 @@
 CC=g++
 CXXFLAGS=-Wall -Wextra -Wuninitialized -MMD -g -fdiagnostics-color=auto
-LDFLAGS=
+LDFLAGS=-lopenblas
 SRC=$(wildcard *.cc)
 OBJ=$(addprefix build/,$(SRC:.cc=.o))
 DEP=$(addprefix build/,$(SRC:.cc=.d))
