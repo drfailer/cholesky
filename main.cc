@@ -22,8 +22,6 @@ initMatrix(std::string const &filename) {
   /* openblas_set_num_threads(1); */
   /* openblas_set_num_threads(20); */
   openblas_set_num_threads(40);
-  std::cout << "parallel? : " << openblas_get_parallel() << std::endl;
-  std::cout << "num threads: " << openblas_get_num_threads() << std::endl;;
 
   fs >> width >> height;
   Matrix<T> matrix(width, height, new T[width * height]());
