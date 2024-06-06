@@ -74,4 +74,4 @@ def generate_repport(filename):
 
 
 parse_results("./result/")
-generate_repport("report.md")
+generate_repport("repport.md")
