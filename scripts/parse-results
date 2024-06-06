@@ -48,7 +48,7 @@ def group_on(measures, access_field):
 ################################################################################
 
 def parse_times_file(filename):
-    size = filename[6: -4]
+    size = int(filename.split('/')[-1][6: -4])
     sizes.append(size)
     measures.append(Measure(size))
     with open(filename, "r") as file:
@@ -70,7 +70,7 @@ def generate_repport(filename):
     measures_sizes = group_on(measures, lambda measure: measure.size)
     with open(filename, "w+") as file:
         for size in sorted(sizes):
-            file.write(f"{measures_sizes[size].mean()}ms +- {'%.3f' % measures_sizes[size].std()}ms\n")
+            file.write(f"{size}: {measures_sizes[size].mean()}ms +- {'%.3f' % measures_sizes[size].std()}ms\n")
 
 
 parse_results("./result/")
