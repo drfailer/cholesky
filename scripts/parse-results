@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+
+import numpy as np
+import os
+
+################################################################################
+#                               global variables                               #
+################################################################################
+
+measures = []
+sizes = []
+
+################################################################################
+#                                   Measure                                    #
+################################################################################
+
+class Measure:
+    def __init__(self, size):
+        self.size = size
+        self.times = []
+
+    def add_time(self, time):
+        self.times.append(time)
+
+    def std(self):
+        return np.std(self.times)
+
+    def mean(self):
+        return np.mean(self.times)
+
+
+################################################################################
+#                                   group on                                   #
+################################################################################
+
+def group_on(measures, access_field):
+    output = dict()
+
+    for measure in measures:
+        field = access_field(measure)
+        output[field] = measure
+
+    return output
+
+
+################################################################################
+#                                 parse files                                  #
+################################################################################
+
+def parse_times_file(filename):
+    size = filename[6: -4]
+    sizes.append(size)
+    measures.append(Measure(size))
+    with open(filename, "r") as file:
+        for line in file:
+            time = int(line[:-3])
+            measures[-1].add_time(time)
+
+
+def parse_results(result_dir):
+    for file in os.listdir(result_dir):
+        parse_times_file(f"{result_dir}/{file}")
+
+
+################################################################################
+#                               generate repport                               #
+################################################################################
+
+def generate_repport(filename):
+    measures_sizes = group_on(measures, lambda measure: measure.size)
+    with open(filename, "w+") as file:
+        for size in sorted(sizes):
+            file.write(f"{measures_sizes[size].mean()}ms +- {'%.3f' % measures_sizes[size].std()}ms\n")
+
+
+parse_results("./result/")
+generate_repport("report.md")

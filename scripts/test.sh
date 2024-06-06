@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-MATRIX_FILES_DIR=../../test-generator/build/test
+MATRIX_FILES_DIR=../../test-generator/scripts/cholesky/
 CHOLESKY=../cholesky
 RESULT_OUTPUT_DIR=./result
 
