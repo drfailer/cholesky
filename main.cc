@@ -3,6 +3,7 @@
 #include "utils.h"
 #include <cassert>
 #include <chrono>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <fstream>
@@ -16,12 +17,6 @@ std::pair<Matrix<T>, Matrix<T>>
 initMatrix(std::string const &filename) {
   std::ifstream fs(filename);
   size_t width, height;
-
-  // make openblas using only one thread
-  /* openblas_set_num_threads(0); */
-  /* openblas_set_num_threads(1); */
-  /* openblas_set_num_threads(20); */
-  openblas_set_num_threads(40);
 
   fs >> width >> height;
   Matrix<T> matrix(width, height, new T[width * height]());
@@ -51,6 +46,7 @@ int main(int argc, char **argv) {
 
   if (argc > 2) {
     /* std::cout << "using lapack function:" << std::endl; */
+    openblas_set_num_threads(atoi(argv[2]));
     auto begin = std::chrono::system_clock::now();
     choleskyLapack(matrix);
     auto end = std::chrono::system_clock::now();
