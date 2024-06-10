@@ -29,7 +29,7 @@ void choleskyLapack(Matrix<Type> &A) {
   int32_t lda = A.width();
   int32_t info = 0;
   /* LAPACK_dpotf2((char*) "U", &n, A.get(), &lda, &info); */
-  LAPACK_dpotrf2((char*) "U", &n, A.get(), &lda, &info);
+  LAPACK_dpotrf((char*) "U", &n, A.get(), &lda, &info);
 }
 
 #endif

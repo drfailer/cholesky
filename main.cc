@@ -15,22 +15,24 @@ using MatrixType = double;
 template <typename T>
 std::pair<Matrix<T>, Matrix<T>>
 initMatrix(std::string const &filename) {
-  std::ifstream fs(filename);
+  std::ifstream fs(filename, std::ios::binary);
   size_t width, height;
 
-  fs >> width >> height;
+  fs.read(reinterpret_cast<char*>(&width), sizeof(width));
+  fs.read(reinterpret_cast<char*>(&height), sizeof(height));
   Matrix<T> matrix(width, height, new T[width * height]());
   Matrix<T> expected(width, height, new T[width * height]());
 
   for (size_t i = 0; i < width * height; ++i) {
-    fs >> matrix.get()[i];
+    fs.read(reinterpret_cast<char*>(matrix.get() + i), sizeof(matrix.get()[i]));
   }
 
-  fs >> width >> height;
+  fs.read(reinterpret_cast<char*>(&width), sizeof(width));
+  fs.read(reinterpret_cast<char*>(&height), sizeof(height));
+
   for (size_t i = 0; i < width * height; ++i) {
-    fs >> expected.get()[i];
+    fs.read(reinterpret_cast<char*>(expected.get() + i), sizeof(expected.get()[i]));
   }
-
   return std::make_pair(matrix, expected);
 }
 
