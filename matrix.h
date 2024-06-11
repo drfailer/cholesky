@@ -23,7 +23,7 @@ class Matrix {
     friend std::ostream& operator<<(std::ostream& os, const Matrix<T>& matrix) {
         for (size_t row = 0; row < matrix.height(); ++row) {
             for (size_t col = 0; col < matrix.width(); ++col) {
-                os << matrix.at(col, row) << " ";
+                os << matrix.at(row, col) << " ";
             }
             os << std::endl;
         }

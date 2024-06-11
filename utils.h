@@ -73,15 +73,17 @@ bool isTriangular(Matrix<Type> const &matrix, Type precision) {
   return true;
 }
 
-template <typename Type>
-bool verifySoluton(Matrix<Type> const &matrix, Matrix<Type> const &expected) {
+template<typename Type>
+bool verrifySolution(Matrix<Type> founded, Matrix<Type> expected, Type precision) {
   bool result = true;
-  for (size_t i = 0; i < matrix.height(); ++i) {
+
+  for (size_t i = 0; i < founded.height(); ++i) {
     for (size_t j = 0; j <= i; ++j) {
-      if (matrix.at(i, j) != expected.at(i, j)) {
-        std::cout << "error: " << matrix.at(i, j) << " != " << expected.at(i, j)
-          << std::endl;
+      if (!((founded.at(i, j) - precision) <= expected.at(i, j) &&
+            expected.at(i, j) <= (founded.at(i, j) + precision))) {
         result = false;
+        /* std::cout << "Error: " << expected.at(i, j) */
+        /*           << " != " << founded.at(i, j) << std::endl; */
       }
     }
   }

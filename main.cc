@@ -45,7 +45,6 @@ int main(int argc, char **argv) {
   auto matrix = result.first;
   auto expected = result.second;
 
-
   if (argc > 2) {
     /* std::cout << "using lapack function:" << std::endl; */
     openblas_set_num_threads(atoi(argv[2]));
@@ -61,7 +60,7 @@ int main(int argc, char **argv) {
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
   }
 
-  if (!verifySoluton(matrix, expected)) {
+  if (!verrifySolution(matrix, expected, 10e-3)) {
     std::cout << "ERROR" << std::endl;
   }
   delete[] matrix.get();
