@@ -12,7 +12,22 @@
 /******************************************************************************/
 
 template<typename Type>
-bool verrifySolution(Matrix<Type> founded, Matrix<Type> expected, Type precision) {
+bool verifyMatrix(Matrix<Type> founded, Matrix<Type> expected, Type precision) {
+  bool result = true;
+
+  for (size_t i = 0; i < expected.height(); ++i) {
+    for (size_t j = 0; j <= i; ++j) {
+      if (!((founded.at(i, j) - precision) <= expected.at(i, j) &&
+            expected.at(i, j) <= (founded.at(i, j) + precision))) {
+        result = false;
+      }
+    }
+  }
+  return result;
+}
+
+template<typename Type>
+bool verifySolution(Matrix<Type> founded, Matrix<Type> expected, Type precision) {
   bool result = true;
   size_t size = expected.height() * expected.width();
 
@@ -61,7 +76,7 @@ InitType<T> initMatrix(std::string const &filename) {
 
   // parse the result vector
   for (size_t i = 0; i < height; ++i) {
-    fs.read(reinterpret_cast<char *>(matrix.get() + i), sizeof(result.get()[i]));
+    fs.read(reinterpret_cast<char *>(result.get() + i), sizeof(result.get()[i]));
   }
 
   // parse the expected matrix
@@ -71,7 +86,7 @@ InitType<T> initMatrix(std::string const &filename) {
 
   // parse the solution matrix
   for (size_t i = 0; i < height; ++i) {
-    fs.read(reinterpret_cast<char *>(matrix.get() + i), sizeof(solution.get()[i]));
+    fs.read(reinterpret_cast<char *>(solution.get() + i), sizeof(solution.get()[i]));
   }
   return InitType(matrix, result, expected, solution);
 }

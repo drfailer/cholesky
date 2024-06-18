@@ -22,7 +22,8 @@ int main(int argc, char **argv) {
   if (argc > 2) {
     openblas_set_num_threads(std::stoi(argv[2]));
     auto begin = std::chrono::system_clock::now();
-    choleskyLapack(matrix);
+//    choleskyLapack(matrix);
+    choleskySolverLapack(matrix, result);
     auto end = std::chrono::system_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms"
               << std::endl;
@@ -34,10 +35,15 @@ int main(int argc, char **argv) {
               << "ms" << std::endl;
   }
 
-  if (!verrifySolution(matrix, expected, 10e-3)) {
-    std::cout << "ERROR" << std::endl;
+  if (!verifyMatrix(matrix, expected, 10e-3)) {
+    std::cout << "ERROR: wrong matrix" << std::endl;
+  }
+  if (argc > 2 && !verifySolution(result, solution, 10e-3)) {
+    std::cout << "ERROR: wrong vector" << std::endl;
   }
   delete[] matrix.get();
+  delete[] result.get();
   delete[] expected.get();
+  delete[] solution.get();
   return 0;
 }
