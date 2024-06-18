@@ -5,6 +5,8 @@ SRC=$(wildcard *.cc)
 OBJ=$(addprefix build/,$(SRC:.cc=.o))
 DEP=$(addprefix build/,$(SRC:.cc=.d))
 
+all: cholesky
+
 cholesky: $(OBJ)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
