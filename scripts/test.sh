@@ -1,24 +1,20 @@
 #!/usr/bin/env bash
 
-MATRIX_FILES_DIR=/scratch/rvc1/samples
-CHOLESKY=/scratch/rvc1/cholesky
-RESULT_OUTPUT_DIR=/scratch/rvc1/results-lapack-$1
+MATRIX_FILES_DIR=../../test-generator/scripts/cholesky/
+CHOLESKY=../cholesky
+RESULT_OUTPUT_DIR=./results
 
-mkdir -p $RESULT_OUTPUT_DIR
-
-THREADS_MIN=8
-THREADS_MAX=384
-THREADS_INC=8
-
-NB_MEASURES=1
+NB_MEASURES=10
+THREADS=(10 15 20 25 30 35 40)
 
 mkdir -p $RESULT_OUTPUT_DIR
 
 run_cholesky() {
   file=$1
   timesfile="times-$(echo $file | sed 's/\.in$/.txt/')"
-  for ((threads=THREADS_MIN; threads<=THREADS_MAX; threads+=THREADS_INC)); do
+  for threads in "${THREADS[@]}"; do
     mkdir -p $RESULT_OUTPUT_DIR/$threads
+    echo "$CHOLESKY $MATRIX_FILES_DIR/$file $threads >> $RESULT_OUTPUT_DIR/$threads/$timesfile"
     for ((i=0; i<$NB_MEASURES; i+=1)); do
       $CHOLESKY $MATRIX_FILES_DIR/$file $threads >> $RESULT_OUTPUT_DIR/$threads/$timesfile
     done
