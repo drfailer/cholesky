@@ -5,89 +5,75 @@
 #include <cstddef>
 #include <iostream>
 #include <random>
-#include <cstring>
+#include <fstream>
 
 /******************************************************************************/
-/*                generate problem                */
+/* test functions                                                             */
 /******************************************************************************/
-
-template <typename Type>
-void transpose(Type *matrix, size_t size) {
-  for (size_t i = 0; i < size; ++i) {
-    for (size_t j = 0; j < i; ++j) {
-      std::swap(matrix[i * size + j], matrix[j * size + i]);
-    }
-  }
-}
-
-template <typename Type>
-void dot(Type *a, Type *c, size_t size) {
-  for (size_t i = 0; i < size; ++i) {
-    for (size_t j = 0; j < size; ++j) {
-      for (size_t k = 0; k < size; ++k) {
-        c[i * size + j] += a[i * size + k] * a[j * size + k];
-      }
-    }
-  }
-}
-
-template <typename Type>
-void generateRandomMatrix(size_t size, Type *matrix, Type *result) {
-  std::random_device dv;
-  std::mt19937 gen(dv());
-  /* std::uniform_real_distribution<> dis(-10, 10); */
-  std::uniform_int_distribution<> dis(0, 10);
-
-  memset(matrix, 0, sizeof(Type) * size * size);
-  memset(result, 0, sizeof(Type) * size * size);
-  for (size_t i = 0; i < size; ++i) {
-    for (size_t j = 0; j <= i; ++j) {
-      Type value = dis(gen);
-      if (value == 0)
-        value++; // make sure we don't have 0 on the diagonal
-      result[i * size + j] = value;
-    }
-  }
-  dot(result, matrix, size);
-}
-
-/******************************************************************************/
-/*                 test functions                 */
-/******************************************************************************/
-
-template <typename Type>
-bool isTriangular(Matrix<Type> const &matrix, Type precision) {
-  for (size_t i = 0; i < matrix.height(); ++i) {
-    for (size_t j = 0; j <= i; ++j) {
-      bool isOne = (1 - precision) <= matrix.at(i, j) &&
-             matrix.at(i, j) <= (1 + precision);
-      bool isZero =
-        -precision <= matrix.at(i, j) && matrix.at(i, j) <= precision;
-      if ((i == j && !isOne) || (i != j && !isZero)) {
-        std::cout << i << ", " << j << ": " << matrix.at(i, j)
-              << std::endl;
-        return false;
-      }
-    }
-  }
-  return true;
-}
 
 template<typename Type>
 bool verrifySolution(Matrix<Type> founded, Matrix<Type> expected, Type precision) {
   bool result = true;
+  size_t size = expected.height() * expected.width();
 
-  for (size_t i = 0; i < founded.height(); ++i) {
-    for (size_t j = 0; j <= i; ++j) {
-      if (!((founded.at(i, j) - precision) <= expected.at(i, j) &&
-            expected.at(i, j) <= (founded.at(i, j) + precision))) {
-        result = false;
-        /* std::cout << "Error: " << expected.at(i, j) */
-        /*           << " != " << founded.at(i, j) << std::endl; */
-      }
+  for (size_t i = 0; i < size; ++i) {
+    if (!((founded.get()[i] - precision) <= expected.get()[i] &&
+          expected.get()[i] <= (founded.get()[i] + precision))) {
+      result = false;
     }
   }
   return result;
+}
+
+/******************************************************************************/
+/* init                                                                       */
+/******************************************************************************/
+
+template <typename T>
+struct InitType {
+  InitType(Matrix<T> &matrix, Matrix<T> &result, Matrix<T> &expected, Matrix<T> &solution):
+    matrix(matrix), result(result), expected(expected), solution(solution) {}
+
+  Matrix<T> matrix;
+  Matrix<T> result;
+  Matrix<T> expected;
+  Matrix<T> solution;
+};
+
+template <typename T>
+InitType<T> initMatrix(std::string const &filename) {
+  std::ifstream fs(filename, std::ios::binary);
+  size_t width, height;
+
+  // parse the size
+  fs.read(reinterpret_cast<char *>(&width), sizeof(width));
+  fs.read(reinterpret_cast<char *>(&height), sizeof(height));
+
+  Matrix<T> matrix(width, height, new T[width * height]());
+  Matrix<T> result(1, height, new T[height]());
+  Matrix<T> expected(width, height, new T[width * height]());
+  Matrix<T> solution(1, height, new T[height]());
+
+  // parse the symmetric matrix
+  for (size_t i = 0; i < width * height; ++i) {
+    fs.read(reinterpret_cast<char *>(matrix.get() + i), sizeof(matrix.get()[i]));
+  }
+
+  // parse the result vector
+  for (size_t i = 0; i < height; ++i) {
+    fs.read(reinterpret_cast<char *>(matrix.get() + i), sizeof(result.get()[i]));
+  }
+
+  // parse the expected matrix
+  for (size_t i = 0; i < width * height; ++i) {
+    fs.read(reinterpret_cast<char *>(expected.get() + i), sizeof(expected.get()[i]));
+  }
+
+  // parse the solution matrix
+  for (size_t i = 0; i < height; ++i) {
+    fs.read(reinterpret_cast<char *>(matrix.get() + i), sizeof(solution.get()[i]));
+  }
+  return InitType(matrix, result, expected, solution);
 }
 
 #endif
