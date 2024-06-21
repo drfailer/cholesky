@@ -45,18 +45,31 @@ bool verifySolution(Matrix<Type> founded, Matrix<Type> expected, Type precision)
 /******************************************************************************/
 
 template <typename T>
-struct InitType {
-  InitType(Matrix<T> &matrix, Matrix<T> &result, Matrix<T> &expected, Matrix<T> &solution):
-    matrix(matrix), result(result), expected(expected), solution(solution) {}
+struct Problem {
+  Problem(
+      Matrix<T> &matrix,
+      Matrix<T> &result,
+      Matrix<T> &expected,
+      Matrix<T> &solution,
+      Matrix<T> &baseMatrix,
+      Matrix<T> &baseResult):
+    matrix(matrix),
+    result(result),
+    expectedMatrix(expected),
+    expectedSolution(solution),
+    baseMatrix(baseMatrix),
+    baseResult(baseResult) {}
 
   Matrix<T> matrix;
   Matrix<T> result;
-  Matrix<T> expected;
-  Matrix<T> solution;
+  Matrix<T> expectedMatrix;
+  Matrix<T> expectedSolution;
+  Matrix<T> baseMatrix;
+  Matrix<T> baseResult;
 };
 
 template <typename T>
-InitType<T> initMatrix(std::string const &filename) {
+Problem<T> initMatrix(std::string const &filename) {
   std::ifstream fs(filename, std::ios::binary);
   size_t width, height;
 
@@ -66,29 +79,43 @@ InitType<T> initMatrix(std::string const &filename) {
 
   Matrix<T> matrix(width, height, new T[width * height]());
   Matrix<T> result(1, height, new T[height]());
-  Matrix<T> expected(width, height, new T[width * height]());
-  Matrix<T> solution(1, height, new T[height]());
+  Matrix<T> baseMatrix(width, height, new T[width * height]());
+  Matrix<T> baseResult(1, height, new T[height]());
+  Matrix<T> expectedMatrix(width, height, new T[width * height]());
+  Matrix<T> expectedSolution(1, height, new T[height]());
 
   // parse the symmetric matrix
   for (size_t i = 0; i < width * height; ++i) {
     fs.read(reinterpret_cast<char *>(matrix.get() + i), sizeof(matrix.get()[i]));
+    baseMatrix.get()[i] = matrix.get()[i];
   }
 
   // parse the result vector
   for (size_t i = 0; i < height; ++i) {
     fs.read(reinterpret_cast<char *>(result.get() + i), sizeof(result.get()[i]));
+    baseResult.get()[i] = result.get()[i];
   }
 
   // parse the expected matrix
   for (size_t i = 0; i < width * height; ++i) {
-    fs.read(reinterpret_cast<char *>(expected.get() + i), sizeof(expected.get()[i]));
+    fs.read(reinterpret_cast<char *>(expectedMatrix.get() + i), sizeof(expectedMatrix.get()[i]));
   }
 
   // parse the solution matrix
   for (size_t i = 0; i < height; ++i) {
-    fs.read(reinterpret_cast<char *>(solution.get() + i), sizeof(solution.get()[i]));
+    fs.read(reinterpret_cast<char *>(expectedSolution.get() + i), sizeof(expectedSolution.get()[i]));
   }
-  return InitType(matrix, result, expected, solution);
+  return Problem(matrix, result, expectedMatrix, expectedSolution, baseMatrix, baseResult);
+}
+
+template <typename T>
+void free(Problem<T> &problem) {
+  delete[] problem.matrix.get();
+  delete[] problem.result.get();
+  delete[] problem.expectedMatrix.get();
+  delete[] problem.expectedSolution.get();
+  delete[] problem.baseMatrix.get();
+  delete[] problem.baseResult.get();
 }
 
 #endif

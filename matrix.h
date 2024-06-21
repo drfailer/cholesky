@@ -20,6 +20,14 @@ class Matrix {
 
     T *get() { return ptr_; }
 
+    void reset(Matrix<T> &matrix) {
+      size_t size = matrix.height_ * matrix.width_;
+
+      for (size_t i = 0; i < size; ++i) {
+        ptr_[i] = matrix.get()[i];
+      }
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Matrix<T>& matrix) {
         for (size_t row = 0; row < matrix.height(); ++row) {
             for (size_t col = 0; col < matrix.width(); ++col) {
