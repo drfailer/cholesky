@@ -21,10 +21,21 @@ run_cholesky() {
   done
 }
 
-if [ $# -eq 1 ]; then
-  run_cholesky $1.in
-else
-  for file in $(ls $MATRIX_FILES_DIR); do
-    run_cholesky $file
-  done
-fi
+run_cholesky_manual() {
+  if [ $# -eq 1 ]; then
+    run_cholesky $1.in
+  else
+    for file in $(ls $MATRIX_FILES_DIR); do
+      run_cholesky $file
+    done
+  fi
+}
+
+run_cholesky_auto() {
+  timesfile="times-$1.txt"
+  file=$1.in
+  echo "$CHOLESKY $MATRIX_FILES_DIR/$file >> $RESULT_OUTPUT_DIR/$timesfile"
+  $CHOLESKY $MATRIX_FILES_DIR/$file >> $RESULT_OUTPUT_DIR/$timesfile
+}
+
+run_cholesky_auto $1
