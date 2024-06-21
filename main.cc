@@ -14,7 +14,7 @@ void testLapack(Matrix<T> &matrix, Matrix<T> &result, size_t nbThreads) {
   auto begin = std::chrono::system_clock::now();
   choleskySolverLapack(matrix, result);
   auto end = std::chrono::system_clock::now();
-  std::cout << matrix.width() << nbThreads << " " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms"
+  std::cout << matrix.width() << " " << nbThreads << " " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms"
     << std::endl;
 }
 
